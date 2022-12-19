@@ -1,0 +1,6 @@
+https://www.geeksforgeeks.org/how-to-create-and-run-node-js-project-in-vs-code-editor/
+
+npm install express
+npm install nodemon
+
+This is not used. Use other backend project (backend-express-socketion)
