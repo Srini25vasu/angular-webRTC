@@ -1,3 +1,6 @@
+References: 
+https://angular.io/guide/singleton-services
+shared module: https://stackblitz.com/run?file=src%2Fapp%2Fcontact%2Fcontact.module.ts
 # AngularWebrtc
 
 This project was generated with [Angular CLI](https://github.com/angular/angular-cli) version 15.0.4.
