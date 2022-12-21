@@ -4,7 +4,7 @@
  * Module dependencies.
  */
 
-var {app, io} = require('../app');
+var { app } = require('../app');
 var debug = require('debug')('server:server');
 var http = require('http');
 
@@ -12,7 +12,7 @@ var http = require('http');
  * Get port from environment and store in Express.
  */
 
-var port = normalizePort(process.env.PORT || '3000');
+var port = normalizePort(process.env.PORT || '4500');
 app.set('port', port);
 
 /**
@@ -20,7 +20,30 @@ app.set('port', port);
  */
 
 var server = http.createServer(app);
-
+// require socket.io
+const io = require('socket.io')(server, {
+  cors: {
+    origin: "*",
+    methods: ["GET", "POST"],   
+    transports: ['polling','websocket'],
+    credentials: true    
+  },
+  rejectUnauthorized: false,
+  transports: ['polling','websocket'],
+  allowEIO3: true
+}); //<------
+//require('./socket')(io)            //<------ 
+io.on('connection', socket => {
+  console.log('new connection');
+  io.on('disconnect', () => console.log('disconnected'));
+  socket.on('send-message', (payload) => {
+    console.log('recieved send-message event');
+    socket.broadcast.emit('message', payload);
+  });
+  socket.on("connect_error", (err) => {
+    console.log(`connect_error due to ${err.message}`);
+  });
+});
 /**
  * Listen on provided port, on all network interfaces.
  */

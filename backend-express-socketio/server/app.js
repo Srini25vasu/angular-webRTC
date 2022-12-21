@@ -7,11 +7,25 @@ var logger = require('morgan');
 var indexRouter = require('./routes/index');
 var usersRouter = require('./routes/users');
 
+const cors = require('cors');
+
 var app = express();
+// CORS policy
+/*app.use(function (req, res, next) {
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Access-Control-Allow-Methods', '*');
+  res.setHeader('Access-Control-Allow-Headers', '*');
+  res.setHeader('Access-Control-Allow-Credentials', true);
+  next();
+});
+*/
+app.use(cors({
+  origin: '*'
+}));
 
 // require socket.io
-const io = require('socket.io')(); //<------
-require('./socket')(io)            //<------ 
+//const io = require('socket.io')(); //<------
+//require('./socket')(io)            //<------ 
 
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
@@ -31,6 +45,8 @@ app.use(function (req, res, next) {
   next(createError(404));
 });
 
+
+
 // error handler
 app.use(function (err, req, res, next) {
   // set locals, only providing error in development
@@ -42,4 +58,4 @@ app.use(function (err, req, res, next) {
   res.render('error');
 });
 
-module.exports = { app, io };
+module.exports = { app };
