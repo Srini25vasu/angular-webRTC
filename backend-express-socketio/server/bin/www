@@ -21,6 +21,7 @@ app.set('port', port);
 
 var server = http.createServer(app);
 // require socket.io
+/* fixed all the socket.io connection issues: srini */
 const io = require('socket.io')(server, {
   cors: {
     origin: "*",
@@ -30,19 +31,64 @@ const io = require('socket.io')(server, {
   },
   rejectUnauthorized: false,
   transports: ['polling','websocket'],
-  allowEIO3: true
+  allowEIO3: true,
+  secure: true,
+  path: '/socket.io'
 }); //<------
+
+const connections = [];
+const clients = [];
 //require('./socket')(io)            //<------ 
 io.on('connection', socket => {
   console.log('new connection');
+  connections.push(socket);
+  clients.push({socked_id: socket.id});
   io.on('disconnect', () => console.log('disconnected'));
+  
   socket.on('send-message', (payload) => {
-    console.log('recieved send-message event');
-    socket.broadcast.emit('message', payload);
+    console.log('recieved send-message event payload:'+JSON.stringify(payload));
+    socket.emit('message', payload);
   });
+  
   socket.on("connect_error", (err) => {
     console.log(`connect_error due to ${err.message}`);
   });
+
+  socket.on('join',(room, callback) => {
+    const clients = io.sockets.adapter.rooms[room];
+    const numClients = (typeof clients !== 'undefined') ? clients.length : 0;
+    console.log('joined room', room);
+    if (numClients > 1) {
+      return callback('already_full');
+    }
+    else if (numClients === 1) {
+      socket.join(room);
+      io.in(room).emit('ready');
+    }
+    else {
+      socket.join(room);
+    }
+    callback();
+  });
+
+  socket.on('offer', (data) => {
+    const { room, offer } = data;
+    console.log('offer from: ', offer);
+    socket.to(room).emit('offer', offer);
+  });
+
+  socket.on('answer', (data) => {
+    const { room, answer } = data;
+    console.log('answer from: ', answer);
+    socket.to(room).emit('answer', answer);
+  });
+
+  socket.on('candidate', (data) => {
+    const { room, candidate } = data;
+    console.log('candidate: ', candidate);
+    socket.to(room).emit('candidate', candidate);
+  });
+
 });
 /**
  * Listen on provided port, on all network interfaces.

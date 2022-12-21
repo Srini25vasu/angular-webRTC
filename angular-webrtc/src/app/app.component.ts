@@ -18,7 +18,12 @@ export class AppComponent implements OnInit {
 
   ngOnInit(): void {
     //throw new Error('Method not implemented.');
-    this.signallingService.getMessages().subscribe((payload) => this._handleMessage(payload));
+    this.signallingService.getMessages().subscribe((payload) =>
+    {
+      console.log('Entering ngInit subscribe: payload: '+ JSON.stringify(payload));
+      this._handleMessage(payload);
+      console.log('Exiting ngInit subscribe');
+    });
   }
 
   public async makeCall(): Promise<void> {
@@ -26,14 +31,18 @@ export class AppComponent implements OnInit {
   }
 
   private async _handleMessage(data: any): Promise<void> {
+    console.log('Entering _handleMessage data.type:'+JSON.stringify(data.type));
     switch (data.type) {
       case 'offer':
+        console.log('Entering offer data.type:'+data.type);
         await this.callService.handleOffer(data.offer, this.remoteVideo);
         break;
       case 'answer':
+        console.log('Entering answer data.type:'+data.type);
         await this.callService.handleAnswer(data.answer);
         break;
       case 'candidate':
+        console.log('Entering candidate data.type:'+data.type);
         await this.callService.handleCandidate(data.candidate);
         break;
       default:
